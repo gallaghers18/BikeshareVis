@@ -6,16 +6,16 @@
 var width = 500;
 var height = 500;
 var stationData;
-var Q1Data;
-var Q2Data;
-var Q3Data;
-var Q4Data;
+var Q1data;
+var Q2data;
+var Q3data;
+var Q4data;
 
 var getStationData = '/stationData/';
-var getQ1Data = '/Q1Data/';
-var getQ2Data = '/Q2Data/';
-var getQ3Data = '/Q3Data/';
-var getQ4Data = '/Q4Data/';
+var getQ1data = '/Q1Data/';
+var getQ2data = '/Q2Data/';
+var getQ3data = '/Q3Data/';
+var getQ4data = '/Q4Data/';
 
 
 // Add svg and g elements to the webpage
@@ -52,11 +52,19 @@ var drawStations = function() {
 
 d3.json(getStationData, function(error, data) {
     stationData = data['data'];
-  
-    // d3.json(getQ1Data, function(error, data) {
-        // console.log(data)
-        drawStations();
-    // });
-  });
+    d3.json(getQ1data, function(error, data) {
+            Q1data = data;
+            d3.json(getQ2data, function(error, data) {
+                Q2data = data;
+                d3.json(getQ3data, function(error, data) {
+                        Q3data = data;
+                        d3.json(getQ4data, function(error, data) {
+                                Q4data = data;
+                                drawStations();
+                        });
+                    });
+            });
+    });
+});
 
  

@@ -1,6 +1,65 @@
 from flask import Flask, render_template, jsonify
 import random
+
+
 app = Flask(__name__)
+with app.app_context():
+
+    Q1data = []
+    with open('2017Q1-capitalbikeshare-tripdata.csv') as csvData:
+        next(csvData)
+        for line in csvData:
+            listy = line.strip().split(',')
+            entry = {}
+            entry['DateOut'] = listy[1]
+            entry['DateIn'] = listy[2]
+            entry['AddressOut'] = listy[4]
+            entry['AddressIn'] = listy[6]
+            entry['MemberType'] = listy[8]
+            Q1data.append(entry)
+        Q1data = jsonify({'data': Q1data})
+
+    Q2data = []
+    with open('2017Q2-capitalbikeshare-tripdata.csv') as csvData:
+        next(csvData)
+        for line in csvData:
+            listy = line.strip().split(',')
+            entry = {}
+            entry['DateOut'] = listy[1]
+            entry['DateIn'] = listy[2]
+            entry['AddressOut'] = listy[4]
+            entry['AddressIn'] = listy[6]
+            entry['MemberType'] = listy[8]
+            Q2data.append(entry)
+        Q2data = jsonify({'data': Q2data})
+
+    Q3data = []
+    with open('2017Q2-capitalbikeshare-tripdata.csv') as csvData:
+        next(csvData)
+        for line in csvData:
+            listy = line.strip().split(',')
+            entry = {}
+            entry['DateOut'] = listy[1]
+            entry['DateIn'] = listy[2]
+            entry['AddressOut'] = listy[4]
+            entry['AddressIn'] = listy[6]
+            entry['MemberType'] = listy[8]
+            Q3data.append(entry)
+        Q3data = jsonify({'data': Q3data})
+
+    Q4data = []
+    with open('2017Q2-capitalbikeshare-tripdata.csv') as csvData:
+        next(csvData)
+        for line in csvData:
+            listy = line.strip().split(',')
+            entry = {}
+            entry['DateOut'] = listy[1]
+            entry['DateIn'] = listy[2]
+            entry['AddressOut'] = listy[4]
+            entry['AddressIn'] = listy[6]
+            entry['MemberType'] = listy[8]
+            Q4data.append(entry)
+        Q4data = jsonify({'data': Q4data})
 
 @app.route('/')
 def forcePlot():
@@ -21,40 +80,25 @@ def getStationData():
             data.append(entry)
     return jsonify({'data': data})
 
-#HERE WE WILL DO ALL OUR AVERAGING AND ANY OTHER PREPROCESSING, BUT FOR NOW I HAVEN'T DONE THAT
 @app.route('/Q1Data/')
-def getQuarterOne():
-    with open('2017Q1-capitalbikeshare-tripdata.csv') as csvData:
-        data = []
-        next(csvData)
-        for line in csvData:
-            listy = line.strip().split(',')
-            entry = {}
-            entry['DateOut'] = listy[1]
-            entry['DateIn'] = listy[2]
-            entry['AddressOut'] = listy[4]
-            entry['AddressIn'] = listy[6]
-            entry['MemberType'] = listy[8]
-            data.append(entry)
-    return jsonify({'data': data})
+def getQ1():
+    return Q1data
 
 @app.route('/Q2Data/')
 def getQ2():
     return Q2data
 
-if __name__=='__main__':
-    # with open('2017Q2-capitalbikeshare-tripdata.csv') as csvData:
-    #     Q2data = []
-    #     next(csvData)
-    #     for line in csvData:
-    #         listy = line.strip().split(',')
-    #         entry = {}
-    #         entry['DateOut'] = listy[1]
-    #         entry['DateIn'] = listy[2]
-    #         entry['AddressOut'] = listy[4]
-    #         entry['AddressIn'] = listy[6]
-    #         entry['MemberType'] = listy[8]
-    #         Q2data.append(entry)
-    #     Q2data = jsonify({'data': Q2data})
+@app.route('/Q3Data/')
+def getQ3():
+    return Q3data
+    
+@app.route('/Q4Data/')
+def getQ4():
+    return Q4data
 
+
+if __name__=='__main__':
     app.run(debug=True)
+
+    
+
