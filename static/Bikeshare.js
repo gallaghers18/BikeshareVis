@@ -52,8 +52,7 @@ var drawStations = function() {
 
 d3.json(getStationData, function(error, data) {
     stationData = data['data'];
-    // RIGHT NOW LOADING THE BIG DATASETS IS BEING REALLY SLOW SO 
-    //WE WILL NEED TO FIGURE OUT HOW WE ARE SUPPOSED TO DO IT.
+  
     // d3.json(getQ1Data, function(error, data) {
         // console.log(data)
         drawStations();
