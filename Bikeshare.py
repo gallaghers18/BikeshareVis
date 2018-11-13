@@ -43,18 +43,18 @@ def getQ2():
     return Q2data
 
 if __name__=='__main__':
-    with open('2017Q2-capitalbikeshare-tripdata.csv') as csvData:
-        Q2data = []
-        next(csvData)
-        for line in csvData:
-            listy = line.strip().split(',')
-            entry = {}
-            entry['DateOut'] = listy[1]
-            entry['DateIn'] = listy[2]
-            entry['AddressOut'] = listy[4]
-            entry['AddressIn'] = listy[6]
-            entry['MemberType'] = listy[8]
-            Q2data.append(entry)
-        Q2data = jsonify({'data': Q2data})
+    # with open('2017Q2-capitalbikeshare-tripdata.csv') as csvData:
+    #     Q2data = []
+    #     next(csvData)
+    #     for line in csvData:
+    #         listy = line.strip().split(',')
+    #         entry = {}
+    #         entry['DateOut'] = listy[1]
+    #         entry['DateIn'] = listy[2]
+    #         entry['AddressOut'] = listy[4]
+    #         entry['AddressIn'] = listy[6]
+    #         entry['MemberType'] = listy[8]
+    #         Q2data.append(entry)
+    #     Q2data = jsonify({'data': Q2data})
 
     app.run(debug=True)
