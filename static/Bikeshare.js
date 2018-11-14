@@ -6,16 +6,24 @@
 var width = 500;
 var height = 500;
 var stationData;
-var Q1data;
-var Q2data;
-var Q3data;
-var Q4data;
+var Q1dataIn;
+var Q2dataIn;
+var Q3dataIn;
+var Q4dataIn;
+var Q1dataOut;
+var Q2dataOut;
+var Q3dataOut;
+var Q4dataOut;
 
 var getStationData = '/stationData/';
-var getQ1data = '/Q1Data/';
-var getQ2data = '/Q2Data/';
-var getQ3data = '/Q3Data/';
-var getQ4data = '/Q4Data/';
+var getQ1dataIn = '/Q1dataIn/';
+var getQ2dataIn = '/Q2dataIn/';
+var getQ3dataIn = '/Q3dataIn/';
+var getQ4dataIn = '/Q4dataIn/';
+var getQ1dataOut = '/Q1dataOut/';
+var getQ2dataOut = '/Q2dataOut/';
+var getQ3dataOut = '/Q3dataOut/';
+var getQ4dataOut = '/Q4dataOut/';
 
 
 // Add svg and g elements to the webpage
@@ -52,19 +60,31 @@ var drawStations = function() {
 
 d3.json(getStationData, function(error, data) {
     stationData = data['data'];
-    d3.json(getQ1data, function(error, data) {
-            Q1data = data;
-            d3.json(getQ2data, function(error, data) {
-                Q2data = data;
-                d3.json(getQ3data, function(error, data) {
-                        Q3data = data;
-                        d3.json(getQ4data, function(error, data) {
-                                Q4data = data;
-                                drawStations();
+    d3.json(getQ1dataIn, function(error, data) {
+            Q1dataIn = data['data'];
+            d3.json(getQ2dataIn, function(error, data) {
+                Q2dataIn = data['data'];
+                d3.json(getQ3dataIn, function(error, data) {
+                        Q3dataIn = data['data'];
+                        d3.json(getQ4dataIn, function(error, data) {
+                                Q4dataIn = data['data'];
+                                d3.json(getQ1dataOut, function(error, data) {
+                                        Q1dataOut = data['data'];
+                                        d3.json(getQ2dataOut, function(error, data) {
+                                            Q2dataOut = data['data'];
+                                            d3.json(getQ3dataOut, function(error, data) {
+                                                    Q3data = data['data'];
+                                                    d3.json(getQ4dataOut, function(error, data) {
+                                                            Q4data = data['data'];
+                                                            drawStations();
+                                                        });
+                                                });
+                                        });
+                                });                        
                         });
-                    });
-            });
-    });
+                });
+        });
+});
 });
 
  
