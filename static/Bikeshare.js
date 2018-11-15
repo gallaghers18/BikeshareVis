@@ -3,8 +3,15 @@
  */
 
  //Size parameters
-var width = 500;
-var height = 500;
+var mapWidth = 400;
+var mapHeight = 400;
+var filtersWidth = 200;
+var filtersHeight = mapHeight;
+var inPlotWidth = 400;
+var inPlotHeight = 400;
+var outPlotWidth = 400;
+var outPlotHeight = 400;
+
 var stationData;
 var Q1dataIn;
 var Q2dataIn;
@@ -25,24 +32,49 @@ var getQ2dataOut = '/Q2dataOut/';
 var getQ3dataOut = '/Q3dataOut/';
 var getQ4dataOut = '/Q4dataOut/';
 
+//Resize background
+d3.select("#mapBackground").attr('width', mapWidth).attr('height', mapHeight).style('position', 'absolute');
 
 // Add svg and g elements to the webpage
-var svgMap = d3.select("#mapDiv").append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
+var svgMap = d3.select("#map").append("svg").style('position', 'absolute')
+        .attr("width", mapWidth)
+        .attr("height", mapHeight);
+var svgFilters = d3.select("#filters").append("svg")
+        .attr("width", filtersWidth)
+        .attr("height", filtersHeight);
+var svgInPlot = d3.select("#inPlot").append("svg")
+        .attr("width", inPlotWidth)
+        .attr("height", inPlotHeight);
+var svgOutPlot = d3.select("#outPlot").append("svg")
+        .attr("width", outPlotWidth)
+        .attr("height", outPlotHeight); 
  
+
+svgFilters.append('svg:rect')
+        .attr('width', filtersWidth)
+        .attr('height', filtersHeight)
+        .style('fill', 'blue');
+svgInPlot.append('svg:rect')
+        .attr('width', inPlotWidth)
+        .attr('height', inPlotHeight)
+        .style('fill', 'green');
+svgOutPlot.append('svg:rect')
+        .attr('width', outPlotWidth)
+        .attr('height', outPlotHeight)
+        .style('fill', 'orange');
+
+
 
 var drawStations = function() {
     xScale = d3.scale.linear()
-                .domain([d3.min(stationData, function(d) { return parseFloat(d['Latitude']); }),
-                        d3.max(stationData, function(d) { return parseFloat(d['Latitude']); })])
-                .range([0, width]);
-    
-    yScale = d3.scale.linear()
                 .domain([d3.min(stationData, function(d) { return parseFloat(d['Longitude']); }),
                         d3.max(stationData, function(d) { return parseFloat(d['Longitude']); })])
-                .range([height, 0]);
+                .range([0, mapWidth]);
+    
+    yScale = d3.scale.linear()
+                .domain([d3.min(stationData, function(d) { return parseFloat(d['Latitude']); }),
+                        d3.max(stationData, function(d) { return parseFloat(d['Latitude']); })])
+                .range([mapHeight, 0]);
                 
     station = svgMap.selectAll('.station')
         .data(stationData);
@@ -52,8 +84,9 @@ var drawStations = function() {
         .append('svg:circle')
         .attr('class', 'station')
         .attr('r', 2)
-        .attr('cx', function(d) {return xScale(d['Latitude'])})
-        .attr('cy', function(d) {return yScale(d['Longitude'])});
+        .attr('cx', function(d) {return xScale(d['Longitude'])})
+        .attr('cy', function(d) {return yScale(d['Latitude'])})
+        .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'red';} else {return 'blue';}});
 }
 
 

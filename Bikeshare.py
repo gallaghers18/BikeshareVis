@@ -69,7 +69,6 @@ with app.app_context():
             return dataIn, dataOut
 
     Q1dataIn, Q1dataOut = formatCsvData('2017Q1-capitalbikeshare-tripdata.csv')
-    print(type(Q1dataIn))
     Q1dataIn = jsonify({'data' : Q1dataIn})
     Q1dataOut = jsonify({'data' : Q1dataOut})
     print("File formatted")
