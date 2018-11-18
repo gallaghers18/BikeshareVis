@@ -1,16 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bikeshare</title>
-    <script src="https://d3js.org/d3.v3.js"></script>
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-
+<title>Bikeshare</title>
+<script src="https://d3js.org/d3.v3.js"></script>
+<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+<style type="text/css">
+        body {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+    
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+    
+</style>
     
 <body>
-    <div id="map"> <img id = "mapBackground" src="{{ url_for("static", filename="DCMap.PNG") }}"> </div>
-    <div id="filters"></div>
-    <div id="inPlot"></div>
-    <div id="outPlot"></div>
+
+        <div style="width: 100%; display: table;">
+            <div style="display: table-row">
+                <div id="map" style="display: table-cell;"> 
+                    <img id = "mapBackground" src="{{ url_for("static", filename="DCMap.PNG") }}"> 
+                </div>
+                <div id="filters" style="display: table-cell;"></div>
+                <div id="inPlot" style="display: table-cell;"></div>
+                <div id="outPlot" style="display: table-cell;"></div>
+            </div>
+        </div>
 
     <script type="text/javascript" src="{{ url_for("static", filename="Bikeshare.js") }}"></script>
 </body>

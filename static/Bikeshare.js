@@ -36,32 +36,37 @@ var getQ4dataOut = '/Q4dataOut/';
 d3.select("#mapBackground").attr('width', mapWidth).attr('height', mapHeight).style('position', 'absolute');
 
 // Add svg and g elements to the webpage
-var svgMap = d3.select("#map").append("svg").style('position', 'absolute')
+var svgMap = d3.select("#map").append("svg")
+        // .style('position', 'absolute')
+        // .style('float', 'left')
         .attr("width", mapWidth)
         .attr("height", mapHeight);
 var svgFilters = d3.select("#filters").append("svg")
+        // .style('margin-left', mapWidth)
+        // .style('float', 'left')
         .attr("width", filtersWidth)
         .attr("height", filtersHeight);
+
 var svgInPlot = d3.select("#inPlot").append("svg")
         .attr("width", inPlotWidth)
         .attr("height", inPlotHeight);
+
 var svgOutPlot = d3.select("#outPlot").append("svg")
+        // .style('margin-left', mapWidth+filtersWidth+inPlotWidth)
+        // .style('float', 'right')
         .attr("width", outPlotWidth)
         .attr("height", outPlotHeight); 
  
 
-svgFilters.append('svg:rect')
-        .attr('width', filtersWidth)
-        .attr('height', filtersHeight)
-        .style('fill', 'blue');
-svgInPlot.append('svg:rect')
-        .attr('width', inPlotWidth)
-        .attr('height', inPlotHeight)
-        .style('fill', 'green');
-svgOutPlot.append('svg:rect')
-        .attr('width', outPlotWidth)
-        .attr('height', outPlotHeight)
-        .style('fill', 'orange');
+// svgFilters.append('svg:rect')
+//         .attr('width', filtersWidth)
+//         .attr('height', filtersHeight)
+//         .style('fill', 'blue');
+
+// svgOutPlot.append('svg:rect')
+//         .attr('width', outPlotWidth)
+//         .attr('height', outPlotHeight)
+//         .style('fill', 'orange');
 
 
 
@@ -89,6 +94,95 @@ var drawStations = function() {
         .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'red';} else {return 'blue';}});
 }
 
+var drawInPlot = function() {
+        maxY = d3.max(d3.values(Q1dataIn), function(d) {
+                return d3.max(d3.values(d['Monday']))
+        });
+
+        xScale = d3.scale.linear()
+                .domain([0, 23.5])
+                .range([0, inPlotWidth]);
+
+        yScale = d3.scale.linear()
+                .domain([0, maxY])
+                // .domain([0, 15])
+                .range([outPlotWidth, 0]);
+
+        svg = svgInPlot.append('svg:g')
+                        .attr('width', inPlotWidth)
+                        .attr('height', inPlotHeight);
+ 
+
+        xAxisBottom = d3.svg.axis()
+                .scale(xScale)
+                .orient('bottom')
+                .ticks(5)
+                .tickSize(5);
+        xAxisG = svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', 'translate(0,' + inPlotHeight + ')')
+                .call(xAxisBottom)
+        xAxisTop = d3.svg.axis()
+                .scale(xScale)
+                .orient('top')
+                // .ticks(topTicks)
+                // .tickSize(topTicks);
+        xAxisG = svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', 'translate(0,' + 0 + ')')
+                .call(xAxisTop)
+        yAxisLeft = d3.svg.axis()
+                .scale(yScale)
+                .orient('left')
+                .ticks(5)
+                .tickSize(5);
+        yAxisG = svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', 'translate(' + 0 + ',0)')
+                .call(yAxisLeft);
+        yAxisRight = d3.svg.axis()
+                .scale(yScale)
+                .orient('right')
+                // .ticks(rightTicks)
+                // .tickSize(rightTicks);
+        yAxisG = svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', 'translate(' + inPlotWidth + ',0)')
+                .call(yAxisRight);
+
+	// point = svg.selectAll('.point') 
+        //         .data(d3.values(Q1dataIn));		
+
+        // point.enter().append('svg:circle');	
+
+        // point
+        //         .attr('class', 'point')									
+        //         .attr('cx', 100)
+        //         .attr('cy', function(d) { 
+        //                 if ('Monday' in d) {
+        //                         if ('4' in d['Monday']) {
+        //                                 return yScale(d['Monday']['4']);
+        //                         }
+        //                 }
+        //         })	
+        //         .style('fill','blue')									
+        //         .attr('r', 5);
+
+        for (station in Q1dataIn) {
+                for (x in Q1dataIn[station]['Monday']) {
+                        // console.log(Q1dataIn[station]['Monday'][x])
+                        svg.append('svg:circle')
+                                .attr('r', 2)
+                                .style('fill', function(d) {if(station == 'Yuma St & Tenley Circle NW') {return 'blue'} return 'green'})
+                                .attr('cx', xScale(x))
+                                .attr('cy', yScale(Q1dataIn[station]['Monday'][x]))
+                }
+        }
+                
+        
+        
+}
+
 
 
 d3.json(getStationData, function(error, data) {
@@ -110,6 +204,7 @@ d3.json(getStationData, function(error, data) {
                                                     d3.json(getQ4dataOut, function(error, data) {
                                                             Q4data = data['data'];
                                                             drawStations();
+                                                            drawInPlot();
                                                         });
                                                 });
                                         });
