@@ -37,6 +37,7 @@ with app.app_context():
                 if addressIn not in dataIn:
                     dataIn[addressIn] = {} #make addressIn a key and set value as nested dic
                     dataIn[addressIn][dayIn] = {} #make dayIn a key in nested dic set value as nested^2 dic
+                    dataIn[addressIn]['Address'] = addressIn
                     dataIn[addressIn][dayIn][timeBin] = 1 #make timeBin a key in nested^2 dic
                 else:
                     if dayIn not in dataIn[addressIn]:
@@ -55,6 +56,7 @@ with app.app_context():
                 if addressOut not in dataOut:
                     dataOut[addressOut] = {} #make addressIn a key and set value as nested dic
                     dataOut[addressOut][dayOut] = {} #make dayIn a key in nested dic set value as nested^2 dic
+                    dataOut[addressOut]['Address'] = addressOut
                     dataOut[addressOut][dayOut][timeBin] = 1 #make timeBin a key in nested^2 dic
                 else:
                     if dayOut not in dataOut[addressOut]:
