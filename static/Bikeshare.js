@@ -72,13 +72,35 @@ var svgOutPlot = d3.select("#outPlot").attr('x', mapWidth + inPlotWidth).attr('y
 svgFilters.append('svg:rect')
         .attr('width', filtersWidth)
         .attr('height', filtersHeight)
-        .style('fill', 'blue');
+        .style('fill', 'green');
 
 svgOutPlot.append('svg:rect')
         .attr('width', outPlotWidth)
         .attr('height', outPlotHeight)
         .style('fill', 'orange');
 
+//I start building filters below
+dayMap = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+
+dayFilter = svgFilters.selectAll('.rect')
+        .data(dayMap)
+
+dayFilter
+        .enter()
+        .append('svg:rect')
+        .attr('class', function(d){return d;})
+        .attr('x', function(d,i){return i*(filtersWidth/7);})
+        .attr('y',filtersHeight/2-filtersWidth/20)
+        .attr('width', filtersWidth/10)
+        .attr('height',filtersWidth/10)
+        .style('fill', 'steelBlue')
+        .on('click', dayFilterClick);
+
+function dayFilterClick(d) {
+    console.log(d);
+    //call function that erases lines in lineplot
+    //call line generator function that passes the value d, which corresponds to the day of the week pressed
+}
 
 
 var drawStations = function() {
@@ -258,4 +280,3 @@ d3.json(getStationData, function(error, data) {
 });
 });
 
- 
