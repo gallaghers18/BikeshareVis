@@ -2,11 +2,8 @@
  * Bikeshare Viz
  */
 
-d3.selection.prototype.moveToFront = function() {
-  return this.each(function(){
-    this.parentNode.appendChild(this);
-  });
-};
+
+
  //Size parameters
 var mapWidth = 450;
 var mapHeight = mapWidth;
@@ -40,6 +37,11 @@ var getQ2dataOut = '/Q2dataOut/';
 var getQ3dataOut = '/Q3dataOut/';
 var getQ4dataOut = '/Q4dataOut/';
 
+var dotDefault = d3.rgb(192, 192, 192);
+var dotToggle = 'red';
+var pathDefault = d3.rgb(192, 192, 192);
+// var pathDefault = 'pink';
+var pathToggle = 'red';
 
 //Resize container svg
 d3.select("#container")
@@ -79,7 +81,7 @@ var svgOutPlot = d3.select("#outPlot").attr('x', mapWidth + inPlotWidth).attr('y
 svgFilters.append('svg:rect')
         .attr('width', filtersWidth)
         .attr('height', filtersHeight)
-        .style('fill', 'green');
+        .style('fill', 'grey');
 
 svgOutPlot.append('svg:rect')
         .attr('width', outPlotWidth)
@@ -114,12 +116,19 @@ dayLabels
         .text(function(d){return d;})
         .on('click', dayFilterClick);
 
+
 function dayFilterClick(d) {
     console.log(d);
     d3.selectAll('#lines')
         .remove()
+
     drawInPlot(d); // draws new day of the week lines
+
+    d3.selectAll('.station')
+        .attr('highlighted', 'off')
+        .style('fill', dotDefault);
 }
+
 
 
 var drawStations = function() {
@@ -128,39 +137,97 @@ var drawStations = function() {
                         d3.max(stationData, function(d) { return parseFloat(d['Longitude']); })])
                 .range([0, mapWidth]);
     
-    yScale = d3.scale.linear()
+        yScale = d3.scale.linear()
                 .domain([d3.min(stationData, function(d) { return parseFloat(d['Latitude']); }),
                         d3.max(stationData, function(d) { return parseFloat(d['Latitude']); })])
                 .range([mapHeight, 0]);
                 
-    station = svgMap.selectAll('.station')
-        .data(stationData);
 
-    station
-        .enter()
-        .append('svg:circle')
-        .attr('class', 'station')
-        .attr('r', 3)
-        .attr('cx', function(d) {return xScale(d['Longitude'])})
-        .attr('cy', function(d) {return yScale(d['Latitude'])})
-        .on('click', function(d) {
-            highlight(d);
-            var sel = d3.select(this);
-            sel.moveToFront();
-            console.log(sel);
-        } )
-        .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'red';} else {return 'blue';}});
+        svgMap.append('svg:rect')
+                .attr("width", mapWidth)
+                .attr("height", mapHeight)
+                .style('fill', 'white')
+                .style('opactiy', 0.0)
+                .on('click', function(d) { 
+                        var x = d3.event.pageX;
+                        var y = d3.event.pageY
+                        console.log(x, y)
+                
+                        d3.selectAll('.station')
+                                .attr('fill', function(d) {
+                                        dot = d3.select(this)
+                                        if (dot.attr('highlighted') == 'off') {
+                                                highlight(d, true);
+                                                dot.style('fill', dotToggle)
+                                                        .attr('highlighted', 'on')
+                                                        .moveToFront();
+                                        } else {
+                                                highlight(d, false);
+                                                dot.style('fill', dotDefault)
+                                                        .attr('highlighted', 'off');
+                                        }
+                                })
+                
+                });
+
+                        
+                        
+
+
+
+        station = svgMap.selectAll('.station')
+                .data(stationData)
+
+        station
+                .enter()
+                .append('svg:circle')
+                .attr('class', 'station')
+                .attr('r', 3)
+                .attr('cx', function(d) {return xScale(d['Longitude'])})
+                .attr('cy', function(d) {return yScale(d['Latitude'])})
+                .attr('highlighted', 'off')
+                .style('fill', dotDefault);
+                // .on('click', function(d) {
+                //         var dot = d3.select(this);
+                //         if (dot.attr('highlighted') == 'off') {
+                //                 highlight(d, true);
+                //                 dot.style('fill', dotToggle)
+                //                         .attr('highlighted', 'on')
+                //                         .moveToFront();
+                //         } else {
+                //                 highlight(d, false);
+                //                 dot.style('fill', dotDefault)
+                //                         .attr('highlighted', 'off');
+                //         }
+                        
+                // });
+        // .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'pink';} else {return dotDefault;}});
 }
 
-function highlight(d) {
-        console.log(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/',''))
-        d3.selectAll(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','')).style('stroke-width', 20).style('stroke', 'green');
+
+// var colors = ['blue', 'green', 'red', 'orange', 'black', 'pink'];
+function highlight(d, turnOn) {
+        console.log(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.',''))
+        if(turnOn) {
+                d3.selectAll(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.',''))
+                        .style('stroke-width', 2)
+                        // .style('stroke', function(d) { return colors[Math.floor(Math.random() * colors.length)]})
+                        .style('stroke', pathToggle)
+                        .moveToFront();
+        } else {
+                d3.selectAll(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.',''))
+                        .style('stroke-width', 1)
+                        // .style('stroke', function(d) { return colors[Math.floor(Math.random() * colors.length)]})
+                        .style('stroke', pathDefault);
+        }
+        
 
 }
+
 
 var drawInPlot = function(day_filter) {
         maxY = d3.max(d3.values(Q1dataIn), function(d) {
-                return d3.max(d3.values(d['Monday']))
+                return d3.max(d3.values(d['Wednesday']))
         });
 
         xScaleIn = d3.scale.linear()
@@ -232,20 +299,12 @@ var drawInPlot = function(day_filter) {
         
         lines.append('svg:path')
                 .attr('id', 'lines')
-                .attr('class', function(d) {return 'c-'+d['Address'].replace(/\s/g, '').replace('&','').replace('/','');})
-                // .attr('class', 'a')
+                .attr('class', function(d) {return 'c-'+d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.','');})
                 .attr('d', function(d) { return lineFunction(generateLineData(d,day_filter)); })
-                .attr('stroke', d3.rgb(192, 192, 192))
+                .attr('stroke', pathDefault)
                 .attr('stroke-width', 1)
                 .attr('fill', 'none')
                 .on('click', function(d) {console.log(d3.select(this).attr('class'))})
-
-        for (station in Q1dataIn) {
-                lineData = []
-                for (x in Q1dataIn[station]['Monday']) {
-                        lineData.push({"x": xScale(x), "y": yScale(Q1dataIn[station]['Monday'][x])})
-                }
-        }    
 }
 
 function generateLineData(d,day_filter) {
@@ -273,7 +332,20 @@ function generateLineData(d,day_filter) {
 
 }
 
-
+d3.selection.prototype.moveToFront = function() {
+        return this.each(function(){
+          this.parentNode.appendChild(this);
+        });
+};
+      
+d3.selection.prototype.moveToBack = function() {  
+        return this.each(function() { 
+                var firstChild = this.parentNode.firstChild; 
+                if (firstChild) { 
+                this.parentNode.insertBefore(this, firstChild); 
+                } 
+        });
+};
 
 d3.json(getStationData, function(error, data) {
     stationData = data['data'];
