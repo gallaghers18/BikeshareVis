@@ -107,16 +107,9 @@ var drawStations = function() {
 }
 
 function highlight(d) {
-        console.log(d['Address'])
-        d3.selectAll('.Thomas Circle'.replace(/\s/g, '')).style('stroke-width', 50).style('stroke', 'green');
-        var address = d['Address'];
-        // svgInPlot.selectAll('.line').selectAll('.15thSt&ConstitutionAveNW').style('fill', 'green');
-        // .style('fill', function(d) {
-        //         if (d['Address'] == address) {
-        //                 return 'blue';
-        //         } 
-        //         return 'grey';
-        // });
+        console.log(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/',''))
+        d3.selectAll(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','')).style('stroke-width', 20).style('stroke', 'green');
+
 }
 
 var drawInPlot = function() {
@@ -192,7 +185,7 @@ var drawInPlot = function() {
                 .interpolate("linear");
         
         lines.append('svg:path')
-                .attr('class', function(d) {return d['Address'].replace(/\s/g, '');})
+                .attr('class', function(d) {return 'c-'+d['Address'].replace(/\s/g, '').replace('&','').replace('/','');})
                 // .attr('class', 'a')
                 .attr('d', function(d) { return lineFunction(generateLineData(d)); })
                 .attr('stroke', d3.rgb(192, 192, 192))
