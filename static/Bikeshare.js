@@ -5,7 +5,7 @@
 
 
  //Size parameters
-var mapWidth = 450;
+var mapWidth = 400;
 var mapHeight = mapWidth;
 var filtersWidth = mapWidth;
 var filtersHeight = mapWidth/4;
@@ -42,6 +42,9 @@ var dotToggle = 'red';
 var pathDefault = d3.rgb(192, 192, 192);
 // var pathDefault = 'pink';
 var pathToggle = 'red';
+var cur_dataset;
+var cur_day;
+
 
 //Resize container svg
 d3.select("#container")
@@ -90,6 +93,7 @@ svgOutPlot.append('svg:rect')
 
 //I start building filters below
 dayMap = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+seasonMap = ['Winter', 'Spring', 'Summer', 'Fall']
 
 dayFilter = svgFilters.selectAll('.rect')
         .data(dayMap);
@@ -97,12 +101,13 @@ dayFilter = svgFilters.selectAll('.rect')
 dayLabels = svgFilters.selectAll('.text')
         .data(dayMap);
 
+
 dayFilter
         .enter()
         .append('svg:rect')
         .attr('class', function(d){return d;})
         .attr('x', function(d,i){return i*(filtersWidth/7);})
-        .attr('y',filtersHeight/2-filtersWidth/20)
+        .attr('y',filtersHeight-filtersWidth/10)
         .attr('width', filtersWidth/9)
         .attr('height',filtersWidth/9)
         .style('fill', 'steelBlue')
@@ -111,22 +116,63 @@ dayFilter
 dayLabels
         .enter()
         .append('text')
-        .attr('x', function(d,i){return i*(filtersWidth/7);})
-        .attr('y',filtersHeight/2)
+        .attr('x', function(d,i){return (i*(filtersWidth/7)+filtersWidth/36);})
+        .attr('y',filtersHeight - filtersWidth/18)
+        .text(function(d){return d.substring(0, 3)+'.';})
+        .on('click', dayFilterClick);
+
+seasonFilter = svgFilters.selectAll('.rect')
+        .data(seasonMap);
+
+seasonLabels = svgFilters.selectAll('.text')
+        .data(seasonMap);
+
+seasonFilter
+        .enter()
+        .append('svg:rect')
+        .attr('class', function(d){return d;})
+        .attr('x', function(d,i){return i*(filtersWidth/4);})
+        .attr('y',0)
+        .attr('width', filtersWidth/6)
+        .attr('height',filtersWidth/9)
+        .style('fill', 'steelBlue')
+        .on('click', seasonFilterClick);
+
+seasonLabels
+        .enter()
+        .append('text')
+        .attr('x', function(d,i){return (i*(filtersWidth/4)+filtersWidth/24);})
+        .attr('y',20)
         .text(function(d){return d;})
         .on('click', dayFilterClick);
 
-
-function dayFilterClick(d) {
-    console.log(d);
+function dayFilterClick(day) {
+    console.log(day, cur_dataset['1st & D St SE']['Friday']);
+    cur_day = day;
     d3.selectAll('#lines')
         .remove()
-
-    drawInPlot(d); // draws new day of the week lines
+    drawInPlot(day,cur_dataset); // draws new day of the week lines
 
     d3.selectAll('.station')
         .attr('highlighted', 'off')
         .style('fill', dotDefault);
+}
+
+function seasonFilterClick(season){
+    if (season==seasonMap[0]){
+        cur_dataset = Q1dataIn
+    }
+    if (season == seasonMap[1]){
+        cur_dataset = Q2dataIn
+    }
+    if (season == seasonMap[2]){
+        cur_dataset = Q3dataIn
+    }
+    if (season == seasonMap[3]){
+        cur_dataset = Q4dataIn
+    }
+    dayFilterClick(cur_day);
+
 }
 
 
@@ -224,9 +270,9 @@ function highlight(d, turnOn) {
 
 }
 
-
-var drawInPlot = function(day_filter) {
-        maxY = d3.max(d3.values(Q1dataIn), function(d) {
+var drawInPlot = function(day_filter,data_set) {
+        // data_set = Q1dataIn;
+        maxY = d3.max(d3.values(data_set), function(d) {
                 return d3.max(d3.values(d['Wednesday']))
         });
 
@@ -289,7 +335,7 @@ var drawInPlot = function(day_filter) {
         // }
         
         lines = svg.selectAll('.line')
-                .data(d3.values(Q1dataIn))
+                .data(d3.values(data_set))
                 .enter();
 
         lineFunction = d3.svg.line()
@@ -365,8 +411,9 @@ d3.json(getStationData, function(error, data) {
                                                     Q3data = data['data'];
                                                     d3.json(getQ4dataOut, function(error, data) {
                                                             Q4data = data['data'];
+                                                            cur_dataset = Q1dataIn;
                                                             drawStations();
-                                                            drawInPlot('Monday');
+                                                            drawInPlot('Monday',cur_dataset);
                                                         });
                                                 });
                                         });
