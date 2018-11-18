@@ -98,8 +98,8 @@ dayFilter
 
 function dayFilterClick(d) {
     console.log(d);
-    //call function that erases lines in lineplot
-    //call line generator function that passes the value d, which corresponds to the day of the week pressed
+    //need to delete old day of the week lines before the line below. dunno how to do it yet
+    drawInPlot(d); // draws new day of the week lines
 }
 
 
@@ -134,7 +134,7 @@ function highlight(d) {
 
 }
 
-var drawInPlot = function() {
+var drawInPlot = function(day_filter) {
         maxY = d3.max(d3.values(Q1dataIn), function(d) {
                 return d3.max(d3.values(d['Monday']))
         });
@@ -209,7 +209,7 @@ var drawInPlot = function() {
         lines.append('svg:path')
                 .attr('class', function(d) {return 'c-'+d['Address'].replace(/\s/g, '').replace('&','').replace('/','');})
                 // .attr('class', 'a')
-                .attr('d', function(d) { return lineFunction(generateLineData(d)); })
+                .attr('d', function(d) { return lineFunction(generateLineData(d,day_filter)); })
                 .attr('stroke', d3.rgb(192, 192, 192))
                 .attr('stroke-width', 1)
                 .attr('fill', 'none')
@@ -223,9 +223,9 @@ var drawInPlot = function() {
         }    
 }
 
-function generateLineData(d) {
-        if (!('Monday' in d)) {
-                console.log("skipped it")
+function generateLineData(d,day_filter) {
+        if (!(day_filter in d)) {
+                // console.log("skipped it",d)
                 return [{"x": xScaleIn(0), "y": yScaleIn(0)},
                         {"x": xScaleIn(23.5), "y": yScaleIn(0)}];
         }
@@ -233,15 +233,15 @@ function generateLineData(d) {
         lineData = []
 
         for (var x=0; x < 24; x=x+0.5) {
-                if (x in d['Monday']) {
-                        lineData.push({"x": xScaleIn(x), "y": yScaleIn(d['Monday'][x])});
+                if (x in d[day_filter]) {
+                        lineData.push({"x": xScaleIn(x), "y": yScaleIn(d[day_filter][x])});
                 } else {
                         lineData.push({"x": xScaleIn(x), "y": yScaleIn(0)});
                 }
         }
 
-        for (x in d['Monday']) {
-                lineData.push({"x": xScaleIn(x), "y": yScaleIn(d['Monday'][x])});
+        for (x in d[day_filter]) {
+                lineData.push({"x": xScaleIn(x), "y": yScaleIn(d[day_filter][x])});
         }
 
         return lineData;
@@ -269,7 +269,7 @@ d3.json(getStationData, function(error, data) {
                                                     d3.json(getQ4dataOut, function(error, data) {
                                                             Q4data = data['data'];
                                                             drawStations();
-                                                            drawInPlot();
+                                                            drawInPlot('Monday');
                                                         });
                                                 });
                                         });
