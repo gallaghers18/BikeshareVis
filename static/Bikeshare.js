@@ -98,7 +98,8 @@ dayFilter
 
 function dayFilterClick(d) {
     console.log(d);
-    //need to delete old day of the week lines before the line below. dunno how to do it yet
+    d3.selectAll('#lines')
+        .remove()
     drawInPlot(d); // draws new day of the week lines
 }
 
@@ -207,6 +208,7 @@ var drawInPlot = function(day_filter) {
                 .interpolate("linear");
         
         lines.append('svg:path')
+                .attr('id', 'lines')
                 .attr('class', function(d) {return 'c-'+d['Address'].replace(/\s/g, '').replace('&','').replace('/','');})
                 // .attr('class', 'a')
                 .attr('d', function(d) { return lineFunction(generateLineData(d,day_filter)); })
