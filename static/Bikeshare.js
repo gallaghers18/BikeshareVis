@@ -2,15 +2,20 @@
  * Bikeshare Viz
  */
 
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+};
  //Size parameters
-var mapWidth = 400;
-var mapHeight = 400;
+var mapWidth = 450;
+var mapHeight = mapWidth;
 var filtersWidth = mapWidth;
-var filtersHeight = 100;
-var inPlotWidth = 400;
-var inPlotHeight = 400;
-var outPlotWidth = 400;
-var outPlotHeight = 400;
+var filtersHeight = mapWidth/4;
+var inPlotWidth = mapWidth;
+var inPlotHeight = mapWidth;
+var outPlotWidth = mapWidth;
+var outPlotHeight = mapWidth;
 
 var stationData;
 var Q1dataIn;
@@ -34,6 +39,8 @@ var getQ1dataOut = '/Q1dataOut/';
 var getQ2dataOut = '/Q2dataOut/';
 var getQ3dataOut = '/Q3dataOut/';
 var getQ4dataOut = '/Q4dataOut/';
+
+
 //Resize container svg
 d3.select("#container")
         .attr('width', mapWidth+inPlotWidth+outPlotWidth)
@@ -83,7 +90,10 @@ svgOutPlot.append('svg:rect')
 dayMap = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 
 dayFilter = svgFilters.selectAll('.rect')
-        .data(dayMap)
+        .data(dayMap);
+
+dayLabels = svgFilters.selectAll('.text')
+        .data(dayMap);
 
 dayFilter
         .enter()
@@ -91,9 +101,17 @@ dayFilter
         .attr('class', function(d){return d;})
         .attr('x', function(d,i){return i*(filtersWidth/7);})
         .attr('y',filtersHeight/2-filtersWidth/20)
-        .attr('width', filtersWidth/10)
-        .attr('height',filtersWidth/10)
+        .attr('width', filtersWidth/9)
+        .attr('height',filtersWidth/9)
         .style('fill', 'steelBlue')
+        .on('click', dayFilterClick);
+
+dayLabels
+        .enter()
+        .append('text')
+        .attr('x', function(d,i){return i*(filtersWidth/7);})
+        .attr('y',filtersHeight/2)
+        .text(function(d){return d;})
         .on('click', dayFilterClick);
 
 function dayFilterClick(d) {
@@ -125,7 +143,12 @@ var drawStations = function() {
         .attr('r', 3)
         .attr('cx', function(d) {return xScale(d['Longitude'])})
         .attr('cy', function(d) {return yScale(d['Latitude'])})
-        .on('click', function(d) {highlight(d)} )
+        .on('click', function(d) {
+            highlight(d);
+            var sel = d3.select(this);
+            sel.moveToFront();
+            console.log(sel);
+        } )
         .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'red';} else {return 'blue';}});
 }
 

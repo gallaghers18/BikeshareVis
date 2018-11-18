@@ -1,7 +1,6 @@
 from flask import Flask, render_template, jsonify
 import datetime
 
-
 app = Flask(__name__)
 with app.app_context():
     print("Beginning Formatting CSVs")
