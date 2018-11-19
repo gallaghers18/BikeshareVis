@@ -63,7 +63,7 @@ var last_seasonClicked;
 
 //Resize container svg
 d3.select("#container")
-        .attr('width', mapWidth+inPlotWidth+outPlotWidth+2*margin)
+        .attr('width', mapWidth+inPlotWidth+outPlotWidth+2.5*margin)
         .attr('height', mapHeight+filtersHeight+margin);
 
 //Resize background
@@ -87,12 +87,12 @@ var svgFilters = d3.select("#filters").attr('x', 0).attr('y', mapHeight+margin)
 var svgInPlot = d3.select("#inPlot").attr('x', mapWidth + margin).attr('y', 0)
         .append("svg")
         .attr("width", inPlotWidth)
-        .attr("height", inPlotHeight);
+        .attr("height", inPlotHeight+50);
 
 var svgOutPlot = d3.select("#outPlot").attr('x', mapWidth + inPlotWidth + 2*margin).attr('y', 0)
         .append("svg")
         .attr("width", outPlotWidth)
-        .attr("height", outPlotHeight); 
+        .attr("height", outPlotHeight+50); 
 
 var highlightRect = svgMap.append('svg:rect')
         .attr('width', 0)
@@ -418,15 +418,17 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
                 .domain([0, maxY])
                 .range([outPlotWidth, 0]);
         if (isInPlot) {
-                 svg = svgInPlot
+                 svg = svgInPlot;
+                 yLab = "Bikes In";
         } else {
-                svg = svgOutPlot
+                svg = svgOutPlot;
+                yLab = "Bikes Out";
         }
 
         xAxisBottom = d3.svg.axis()
                 .scale(xScaleLine)
                 .orient('bottom')
-                .ticks(5)
+                .ticks(24)
                 .tickSize(5);
         xAxisG = svg.append('g')
                 .attr('class', 'axis')
@@ -434,18 +436,16 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
                 .call(xAxisBottom)
         xAxisTop = d3.svg.axis()
                 .scale(xScaleLine)
-                .orient('top')
-                // .ticks(topTicks)
-                // .tickSize(topTicks);
+                .orient('top');
         xAxisG = svg.append('g')
                 .attr('class', 'axis')
                 .attr('transform', 'translate(0,' + 0 + ')')
                 .call(xAxisTop)
         yAxisLeft = d3.svg.axis()
                 .scale(yScaleLine)
-                .orient('left')
-                .ticks(5)
-                .tickSize(5);
+                .orient('right')
+                .ticks(10)
+                .tickSize(10);
         yAxisG = svg.append('g')
                 .attr('class', 'axis')
                 .attr('transform', 'translate(' + 0 + ',0)')
@@ -453,17 +453,16 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
         yAxisRight = d3.svg.axis()
                 .scale(yScaleLine)
                 .orient('right')
-                // .ticks(rightTicks)
-                // .tickSize(rightTicks);
         yAxisG = svg.append('g')
                 .attr('class', 'axis')
                 .attr('transform', 'translate(' + inPlotWidth + ',0)')
                 .call(yAxisRight);
 
+        
         title = svg.append('svg:text')
-                .attr('x', 10)
-                .attr('y', 30)
-                .text('Bikes In')
+                .attr('x', 5)
+                .attr('y', 20)
+                .text(yLab)
                 .style('font-size', '24px');
 
         
