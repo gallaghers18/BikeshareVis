@@ -107,7 +107,7 @@ var highlightRect = svgMap.append('svg:rect')
         .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
         .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 
-        //JUST FOR POSITIONING TEMPORARYRRRRRYYYYYYYY
+
 svgFilters.append('svg:rect')
         .attr('width', filtersWidth)
         .attr('height', filtersHeight)
@@ -299,6 +299,8 @@ var drawStations = function() {
                 })
                 .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
                 .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
+
+        highlightRect.moveToFront();
 }
 
 function resolveMouseUp(coords) {
@@ -309,35 +311,35 @@ function resolveMouseUp(coords) {
                 .attr('width', 0)
                 .attr('height', 0);
                 
-        svgMap.append('svg:rect')
-            .attr('class', 'reset')
-            .attr('x', mapWidth-60)
-            .attr('y',50)
-            .attr('width', 25)
-            .attr('height', 25)
-            .style('fill', 'red')
-            .style('stroke', 'black')
-            .on('click',unhighlight)
-            .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        // svgMap.append('svg:rect')
+        //     .attr('class', 'reset')
+        //     .attr('x', mapWidth-60)
+        //     .attr('y',50)
+        //     .attr('width', 25)
+        //     .attr('height', 25)
+        //     .style('fill', 'red')
+        //     .style('stroke', 'black')
+        //     .on('click',unhighlight)
+        //     .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
 
-        svgMap.append("text")
-            .attr('class', 'reset')
-            .attr("x", mapWidth - 70)
-            .attr("y", 45)
-            .text('click reset');
+        // svgMap.append("text")
+        //     .attr('class', 'reset')
+        //     .attr("x", mapWidth - 70)
+        //     .attr("y", 45)
+        //     .text('click reset');
 
-        function unhighlight(){
-            d3.selectAll('.station')
-                .attr('highlighted', 'off')
-                .style('fill', dotDefault);
+        // function unhighlight(){
+        //     d3.selectAll('.station')
+        //         .attr('highlighted', 'off')
+        //         .style('fill', dotDefault);
 
-            d3.selectAll('.lines')
-                .style('stroke', dotDefault)
-                .style('stroke-width',1)
+        //     d3.selectAll('.lines')
+        //         .style('stroke', dotDefault)
+        //         .style('stroke-width',1)
 
-            d3.selectAll('.reset')
-                .remove()
-            }
+        //     d3.selectAll('.reset')
+        //         .remove()
+        //     }
 
         
         d3.selectAll('.station')
@@ -366,6 +368,18 @@ function resolveMouseUp(coords) {
         
         
 }
+
+function unhighlight(){
+        d3.selectAll('.station')
+            .attr('highlighted', 'off')
+            .style('fill', dotDefault);
+
+        d3.selectAll('.lines')
+            .style('stroke', dotDefault)
+            .style('stroke-width',1)
+
+        
+        }
 
 function drawHighlightRect(coords) {
         if (mouseDown) {
@@ -558,6 +572,32 @@ d3.selection.prototype.moveToBack = function() {
                 } 
         });
 };
+
+var resetButton = d3.select("#map").append('svg:rect')
+        .attr('class', 'reset')
+        .attr('x', mapWidth-60)
+        .attr('y',50)
+        .attr('width', 25)
+        .attr('height', 25)
+        .style('fill', 'red')
+        .style('stroke', 'black')
+        .on('click',unhighlight)
+        .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        .moveToFront();
+
+// resetButton.append('svg:line')
+//         .attr('x1',3)
+//         .attr('y1', 3)
+//         .attr('x2', 22)
+//         .attr('y2', 22)
+//         .style('stroke', 'black')
+//         .moveToFront();
+
+d3.select("#map").append("text")
+        .attr('class', 'reset')
+        .attr("x", mapWidth - 70)
+        .attr("y", 45)
+        .text('click reset');
 
 d3.json(getStationData, function(error, data) {
     stationData = data['data'];
