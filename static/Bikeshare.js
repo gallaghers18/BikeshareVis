@@ -309,7 +309,37 @@ function resolveMouseUp(coords) {
                 .attr('width', 0)
                 .attr('height', 0);
                 
+        svgMap.append('svg:rect')
+            .attr('class', 'reset')
+            .attr('x', mapWidth-60)
+            .attr('y',50)
+            .attr('width', 25)
+            .attr('height', 25)
+            .style('fill', 'red')
+            .style('stroke', 'black')
+            .on('click',unhighlight)
+            .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
 
+        svgMap.append("text")
+            .attr('class', 'reset')
+            .attr("x", mapWidth - 70)
+            .attr("y", 45)
+            .text('click reset');
+
+        function unhighlight(){
+            d3.selectAll('.station')
+                .attr('highlighted', 'off')
+                .style('fill', dotDefault);
+
+            d3.selectAll('.lines')
+                .style('stroke', dotDefault)
+                .style('stroke-width',1)
+
+            d3.selectAll('.reset')
+                .remove()
+            }
+
+        
         d3.selectAll('.station')
                 .attr('fill', function(d) {
                         dot = d3.select(this);
