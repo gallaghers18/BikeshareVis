@@ -99,10 +99,10 @@ var highlightRect = svgMap.append('svg:rect')
         .attr('height', 0)
         .style('fill', 'rgba(0, 0, 0, 0.5)')
         .on('mouseup', function (d) {
-                resolveMouseUp();
+                resolveMouseUp(d3.mouse(this));
         })
         .on('mousemove', function(d) {
-                drawHighlightRect();  
+                drawHighlightRect(d3.mouse(this));
         })
         .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
         .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
@@ -202,6 +202,7 @@ function dayFilterClick(day) {
     //     .attr('highlighted', 'off')
     //     .style('fill', dotDefault);
 
+
     last_dayClicked = day; // keep track of last square pressed
 }
 
@@ -235,8 +236,9 @@ function seasonFilterClick(season){
 
 
     }
-    dayFilterClick(cur_day);
     last_seasonClicked = season; // keep track of last square pressed
+
+    dayFilterClick(cur_day);
 }
 
 
@@ -260,25 +262,12 @@ var drawStations = function() {
                 .enter()
                 .append('svg:circle')
                 .attr('class', 'station')
+                .attr('id', function(d) { return 's-'+d['Address'].replace(/\W/g, ''); })
                 .attr('r', 3)
                 .attr('cx', function(d) {return xScale(d['Longitude'])})
                 .attr('cy', function(d) {return yScale(d['Latitude'])})
                 .attr('highlighted', 'off')
                 .style('fill', dotDefault);
-                // .on('click', function(d) {
-                //         var dot = d3.select(this);
-                //         if (dot.attr('highlighted') == 'off') {
-                //                 highlight(d, true);
-                //                 dot.style('fill', dotToggle)
-                //                         .attr('highlighted', 'on')
-                //                         .moveToFront();
-                //         } else {
-                //                 highlight(d, false);
-                //                 dot.style('fill', dotDefault)
-                //                         .attr('highlighted', 'off');
-                //         }
-                        
-                // });
         // .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'pink';} else {return dotDefault;}});
  
 
@@ -289,12 +278,14 @@ var drawStations = function() {
                 .style('stroke', 'black')
                 .moveToFront()
                 .on('mousemove', function(d) {
-                        drawHighlightRect();
+                        drawHighlightRect(d3.mouse(this));
                         
                 })
                 .on('mousedown', function(d) {
-                        downX = d3.event.pageX;
-                        downY = d3.event.pageY;
+                        // downX = d3.event.pageX;
+                        // downY = d3.event.pageY;
+                        downX = d3.mouse(this)[0];
+                        downY = d3.mouse(this)[1];
                         highlightRect
                                 .attr('x', downX)
                                 .attr('y', downY)
@@ -303,17 +294,16 @@ var drawStations = function() {
                         mouseDown = true;
                 })
                 .on('mouseup', function(d) {
-                        resolveMouseUp();
+                        resolveMouseUp(d3.mouse(this));
 
                 })
                 .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
                 .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 }
 
-function resolveMouseUp() {
-        upX = d3.event.pageX;
-        upY = d3.event.pageY;
-        console.log(upX, upY)
+function resolveMouseUp(coords) {
+        upX = coords[0];
+        upY = coords[1];
         mouseDown = false;
         highlightRect
                 .attr('width', 0)
@@ -347,10 +337,11 @@ function resolveMouseUp() {
         
 }
 
-function drawHighlightRect() {
+function drawHighlightRect(coords) {
         if (mouseDown) {
-                curX = d3.event.pageX;
-                curY = d3.event.pageY; 
+                curX = coords[0];
+                curY = coords[1];
+                console.log(curX, curY);
                 dX = curX - downX;
                 dY = curY - downY
                 if (dX >= 0) {
@@ -382,19 +373,13 @@ function drawHighlightRect() {
         }
 }
 
-// var colors = ['blue', 'green', 'red', 'orange', 'black', 'pink'];
 function highlight(d, turnOn) {
-        // console.log("#c-"+d['Address'].replace(/\W/g, ''))
         if(turnOn) {
                 d3.selectAll("#c-"+d['Address'].replace(/\W/g, ''))     
-                        .style('stroke-width', 2)
-                        // .style('stroke', function(d) { return colors[Math.floor(Math.random() * colors.length)]})
                         .style('stroke', selectionColors[selectionCount])
                         .moveToFront();
         } else {
                 d3.selectAll("#c-"+d['Address'].replace(/\W/g, '')) 
-                        .style('stroke-width', 1)
-                        // .style('stroke', function(d) { return colors[Math.floor(Math.random() * colors.length)]})
                         .style('stroke', pathDefault);
         }
         
@@ -403,9 +388,8 @@ function highlight(d, turnOn) {
 
 
 
-var drawPlot = function(day_filter,data_set, isInPlot) {
-        // data_set = Q1dataIn;
-        
+var drawPlot = function(day_filter,data_set, isInPlot) {        
+        //SCALING
         maxY = d3.max(d3.values(Q3dataIn), function(d) {
                 return d3.max(d3.values(d['Thursday']))
         });
@@ -417,6 +401,8 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
         yScaleLine = d3.scale.linear()
                 .domain([0, maxY])
                 .range([outPlotWidth, 0]);
+        
+        //IN OR OUT PLOT
         if (isInPlot) {
                  svg = svgInPlot;
                  yLab = "Bikes In";
@@ -425,6 +411,7 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
                 yLab = "Bikes Out";
         }
 
+        //AXES AND LABELS
         xAxisBottom = d3.svg.axis()
                 .scale(xScaleLine)
                 .orient('bottom')
@@ -458,11 +445,16 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
                 .attr('transform', 'translate(' + inPlotWidth + ',0)')
                 .call(yAxisRight);
 
-        
-        title = svg.append('svg:text')
+        yLab = svg.append('svg:text')
                 .attr('x', 5)
                 .attr('y', 20)
                 .text(yLab)
+                .style('font-size', '24px');
+        
+        xLab = svg.append('svg:text')
+                .attr('x', 2*margin)
+                .attr('y', inPlotHeight+margin)
+                .text('Time of Day (24 hour mode)')
                 .style('font-size', '24px');
 
         
@@ -479,15 +471,26 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
                 .attr('id', function(d) { return 'c-'+d['Address'].replace(/\W/g, ''); })
                 .attr('class', 'lines')
                 .attr('d', function(d) { return lineFunction(generateLineData(d,day_filter)); })
-                .attr('stroke', pathDefault)
+                .attr('stroke', function(d) {
+                        var dot = d3.select("#s-"+d['Address'].replace(/\W/g, ''));
+                        if (dot[0][0] != null) {
+                                return dot.style('fill'); 
+                        } else {
+                                return pathDefault;
+                        }
+                })
                 .attr('stroke-width', 1)
                 .attr('fill', 'none')
-                .on('click', function(d) {console.log(d3.select(this).attr('id'))})
+                .on('click', function(d) {console.log(d3.select(this).attr('id'))});
+
+        
+
+
+                
 }
 
 function generateLineData(d,day_filter) {
         if (!(day_filter in d)) {
-                // console.log("skipped it",d)
                 return [{"x": xScaleLine(0), "y": yScaleLine(0)},
                         {"x": xScaleLine(23.5), "y": yScaleLine(0)}];
         }
@@ -510,30 +513,6 @@ function generateLineData(d,day_filter) {
 
 }
 
-function generateLineDataIn(d,day_filter) {
-        if (!(day_filter in d)) {
-                // console.log("skipped it",d)
-                return [{"x": xScaleLine(0), "y": yScaleLine(0)},
-                        {"x": xScaleLine(23.5), "y": yScaleLine(0)}];
-        }
-
-        lineData = []
-
-        for (var x=0; x < 24; x=x+0.5) {
-                if (x in d[day_filter]) {
-                        lineData.push({"x": xScaleLine(x), "y": yScaleLine(d[day_filter][x])});
-                } else {
-                        lineData.push({"x": xScaleLine(x), "y": yScaleLine(0)});
-                }
-        }
-
-        for (x in d[day_filter]) {
-                lineData.push({"x": xScaleLine(x), "y": yScaleLine(d[day_filter][x])});
-        }
-
-        return lineData;
-
-}
 
 d3.selection.prototype.moveToFront = function() {
         return this.each(function(){
