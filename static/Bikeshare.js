@@ -36,9 +36,9 @@ var getQ2dataOut = '/Q2dataOut/';
 var getQ3dataOut = '/Q3dataOut/';
 var getQ4dataOut = '/Q4dataOut/';
 
-var dotDefault = d3.rgb(192, 192, 192);
+var dotDefault = d3.rgb(100, 100, 100);
 var dotToggle = 'red';
-var pathDefault = d3.rgb(192, 192, 192);
+var pathDefault = d3.rgb(192,192,192);
 // var pathDefault = 'pink';
 var pathToggle = 'red';
 
@@ -52,7 +52,7 @@ var curY;
 var mouseDown = false;
 
 var selectionCount = 0;
-var selectionColors = ['Red', 'Blue', 'Green', 'Pink', 'Purple', 'Orange', 'Red']
+var selectionColors = ['red', 'blue', 'green', 'orange', 'red']
 
 var cur_dataset_in;
 var cur_dataset_out;
@@ -60,6 +60,20 @@ var cur_day;
 var last_dayClicked;
 var last_seasonClicked;
 
+d3.selection.prototype.moveToFront = function() {
+        return this.each(function(){
+          this.parentNode.appendChild(this);
+        });
+};
+      
+d3.selection.prototype.moveToBack = function() {  
+        return this.each(function() { 
+                var firstChild = this.parentNode.firstChild; 
+                if (firstChild) { 
+                this.parentNode.insertBefore(this, firstChild); 
+                } 
+        });
+};
 
 //Resize container svg
 d3.select("#container")
@@ -72,10 +86,10 @@ d3.select("#mapBackground").attr('width', mapWidth).attr('height', mapHeight).st
 // Add svg and g elements to the webpage
 var svgMap = d3.select("#map").attr('x', 0).attr('y', 0)
         .append("svg")
-        .style('position', 'absolute')
+        // .style('position', 'absolute')
         // .style('float', 'left')
         .attr("width", mapWidth)
-        .attr("height", mapHeight);
+        .attr("height", mapHeight-10);
 
 d3.select("#filters").attr('x', 2*mapWidth)
 
@@ -113,6 +127,18 @@ svgFilters.append('svg:rect')
         .attr('height', filtersHeight)
         .style('fill', '#DCDCDC')
         .style('stroke', 'black');
+
+var DCMap = svgMap.append('svg:image')
+        .attr({
+                'xlink:href': 'https://upload.wikimedia.org/wikipedia/commons/9/93/DC_neighborhoods_map.png',
+                x: -inPlotWidth/10.7,
+                y: -inPlotHeight/4.3,
+                width: 1.2*inPlotWidth,
+                height: 1.2*inPlotHeight,
+
+        })
+        .attr('opacity', 0.2)
+        .moveToBack();
 
 //I start building filters below
 dayMap = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
@@ -248,12 +274,12 @@ var drawStations = function() {
         var xScale = d3.scale.linear()
                 .domain([d3.min(stationData, function(d) { return parseFloat(d['Longitude']); }),
                         d3.max(stationData, function(d) { return parseFloat(d['Longitude']); })])
-                .range([0, mapWidth]);
+                .range([-0.5*mapWidth, mapWidth]);
 
         var yScale = d3.scale.linear()
                 .domain([d3.min(stationData, function(d) { return parseFloat(d['Latitude']); }),
                         d3.max(stationData, function(d) { return parseFloat(d['Latitude']); })])
-                .range([mapHeight, 0]);
+                .range([mapHeight, -0.8*mapHeight]);
 
         station = svgMap.selectAll('.station')
                 .data(stationData)
@@ -263,17 +289,17 @@ var drawStations = function() {
                 .append('svg:circle')
                 .attr('class', 'station')
                 .attr('id', function(d) { return 's-'+d['Address'].replace(/\W/g, ''); })
-                .attr('r', 3)
+                .attr('r', 2)
                 .attr('cx', function(d) {return xScale(d['Longitude'])})
                 .attr('cy', function(d) {return yScale(d['Latitude'])})
                 .attr('highlighted', 'off')
                 .style('fill', dotDefault);
-        // .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'pink';} else {return dotDefault;}});
+                // .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW' || d['Address'] == 'New York Ave & 15th St NW') {return 'red';} else {return 'rgb(255,255,255,0)';}});
  
 
         svgMap.append('svg:rect')
                 .attr("width", mapWidth)
-                .attr("height", mapHeight)
+                .attr("height", mapHeight-10)
                 .style('fill', 'rgba(0, 0, 0, 0.0)')
                 .style('stroke', 'black')
                 .moveToFront()
@@ -282,8 +308,6 @@ var drawStations = function() {
                         
                 })
                 .on('mousedown', function(d) {
-                        // downX = d3.event.pageX;
-                        // downY = d3.event.pageY;
                         downX = d3.mouse(this)[0];
                         downY = d3.mouse(this)[1];
                         highlightRect
@@ -311,36 +335,6 @@ function resolveMouseUp(coords) {
                 .attr('width', 0)
                 .attr('height', 0);
                 
-        // svgMap.append('svg:rect')
-        //     .attr('class', 'reset')
-        //     .attr('x', mapWidth-60)
-        //     .attr('y',50)
-        //     .attr('width', 25)
-        //     .attr('height', 25)
-        //     .style('fill', 'red')
-        //     .style('stroke', 'black')
-        //     .on('click',unhighlight)
-        //     .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
-
-        // svgMap.append("text")
-        //     .attr('class', 'reset')
-        //     .attr("x", mapWidth - 70)
-        //     .attr("y", 45)
-        //     .text('click reset');
-
-        // function unhighlight(){
-        //     d3.selectAll('.station')
-        //         .attr('highlighted', 'off')
-        //         .style('fill', dotDefault);
-
-        //     d3.selectAll('.lines')
-        //         .style('stroke', dotDefault)
-        //         .style('stroke-width',1)
-
-        //     d3.selectAll('.reset')
-        //         .remove()
-        //     }
-
         
         d3.selectAll('.station')
                 .attr('fill', function(d) {
@@ -350,7 +344,7 @@ function resolveMouseUp(coords) {
                                 && dot.attr('cy') <= Math.max(upY, downY)  
                                 && dot.attr('cy') >= Math.min(upY, downY) ) {
                                         // if (dot.attr('highlighted') == 'off') {
-                                        if (dot.style('fill') != selectionColors[(selectionCount + 5) % 6]){
+                                        if (dot.style('fill') != selectionColors[(selectionCount + 3) % 4]){
                                                 highlight(d, true);
                                                 dot.style('fill', selectionColors[selectionCount])
                                                         .attr('highlighted', 'on')
@@ -362,7 +356,7 @@ function resolveMouseUp(coords) {
                                 }
         })
         console.log(selectionCount);
-        selectionCount = (selectionCount % 6) + 1;
+        selectionCount = (selectionCount % 4) + 1;
         console.log('changed to ')
         console.log(selectionCount)
         
@@ -375,7 +369,7 @@ function unhighlight(){
             .style('fill', dotDefault);
 
         d3.selectAll('.lines')
-            .style('stroke', dotDefault)
+            .style('stroke', pathDefault)
             .style('stroke-width',1)
 
         
@@ -518,7 +512,13 @@ var drawPlot = function(day_filter,data_set, isInPlot) {
                 .attr('stroke', function(d) {
                         var dot = d3.select("#s-"+d['Address'].replace(/\W/g, ''));
                         if (dot[0][0] != null) {
-                                return dot.style('fill'); 
+                                if (dot.attr('highlighted') == 'on') {
+                                        d3.select(this).moveToFront();
+                                        return dot.style('fill'); 
+                                } else {
+                                        d3.select(this).moveToBack();
+                                        return pathDefault;
+                                }
                         } else {
                                 return pathDefault;
                         }
@@ -558,20 +558,7 @@ function generateLineData(d,day_filter) {
 }
 
 
-d3.selection.prototype.moveToFront = function() {
-        return this.each(function(){
-          this.parentNode.appendChild(this);
-        });
-};
-      
-d3.selection.prototype.moveToBack = function() {  
-        return this.each(function() { 
-                var firstChild = this.parentNode.firstChild; 
-                if (firstChild) { 
-                this.parentNode.insertBefore(this, firstChild); 
-                } 
-        });
-};
+
 
 var resetButton = d3.select("#map").append('svg:rect')
         .attr('class', 'reset')
@@ -584,14 +571,6 @@ var resetButton = d3.select("#map").append('svg:rect')
         .on('click',unhighlight)
         .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
         .moveToFront();
-
-// resetButton.append('svg:line')
-//         .attr('x1',3)
-//         .attr('y1', 3)
-//         .attr('x2', 22)
-//         .attr('y2', 22)
-//         .style('stroke', 'black')
-//         .moveToFront();
 
 d3.select("#map").append("text")
         .attr('class', 'reset')
