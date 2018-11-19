@@ -198,9 +198,9 @@ function dayFilterClick(day) {
     drawPlot(day,cur_dataset_in, true)
     drawPlot(day,cur_dataset_out, false); // draws new day of the week lines for given season
 
-    d3.selectAll('.station')
-        .attr('highlighted', 'off')
-        .style('fill', dotDefault);
+    // d3.selectAll('.station')
+    //     .attr('highlighted', 'off')
+    //     .style('fill', dotDefault);
 
     last_dayClicked = day; // keep track of last square pressed
 }
