@@ -166,7 +166,6 @@ seasonFilter
 seasonLabels
         .enter()
         .append('text')
-        // .attr('class','text')
         .attr('x', function(d,i){return (i*(filtersWidth/4)+filtersWidth/24);})
         .attr('y',20)
         .text(function(d){return d;})
@@ -174,43 +173,31 @@ seasonLabels
 
 function dayFilterClick(day) {
     console.log(day, cur_dataset['1st & D St SE']['Friday']);
-    // ISSUES CURRENTLY:
-    // when you click on text, textSVGelement is passed into here as 'this'. 
-    // THis means we end up changing the color of the text, which we don't want!!
-    // In addition, when you click on a season, then a day, then another season, weird things happen.
-    //  this might have to do with the fact that the season.constructor.name is a window, as opposed to a rect svg elemtn...weird
     cur_day = day;
     
-    if (last_dayClicked !== undefined){
-        d3.select(last_dayClicked)
-        .style('fill', 'steelBlue');
-    }
-    d3.select(this)
-        .style('fill', '#004d80');
+    d3.select("."+last_dayClicked) //make last pressed day button normal color
+    .style('fill', 'steelBlue');
 
-    // d3.selectAll('.text')
-    //     .style('fill','black');
+    d3.select("."+day) // make newly pressed day button darker color
+        .style('fill', '#004d80');
 
     d3.selectAll('.lines')
         .remove()
-    drawInPlot(day,cur_dataset); // draws new day of the week lines
+    drawInPlot(day,cur_dataset); // draws new day of the week lines for given season
 
     d3.selectAll('.station')
         .attr('highlighted', 'off')
         .style('fill', dotDefault);
 
-    last_dayClicked = this; // keep track of last square pressed
+    last_dayClicked = day; // keep track of last square pressed
 }
 
 function seasonFilterClick(season){
-    if (last_seasonClicked !== undefined){
-        d3.select(last_seasonClicked)
-        .style('fill', 'steelBlue');
-    }
+    d3.select("."+last_seasonClicked) // make last pressed season button normal color
+    .style('fill', 'steelBlue');
 
-    d3.select(this)
-        .style('fill', '#004d80');
-    last_seasonClicked = this; // keep track of last square pressed
+    d3.select("."+season) //make last pressed season button darker color
+        .style('fill', '#004d80');    
 
     if (season==seasonMap[0]){
         cur_dataset = Q1dataIn
@@ -225,6 +212,7 @@ function seasonFilterClick(season){
         cur_dataset = Q4dataIn
     }
     dayFilterClick(cur_day);
+    last_seasonClicked = season; // keep track of last square pressed
 }
 
 
@@ -519,6 +507,14 @@ d3.json(getStationData, function(error, data) {
                                                             Q4data = data['data'];
                                                             cur_dataset = Q1dataIn;
                                                             cur_day = 'Monday';
+                                                            last_seasonClicked = 'Winter';
+                                                            last_dayClicked = 'Monday';
+
+                                                            d3.select("."+last_seasonClicked)
+                                                                .style('fill', '#004d80');
+                                                            d3.select("."+last_dayClicked)
+                                                                .style('fill', '#004d80');
+
                                                             drawStations();
                                                             drawInPlot('Monday',cur_dataset);
                                                         });
@@ -530,4 +526,3 @@ d3.json(getStationData, function(error, data) {
         });
 });
 });
-
