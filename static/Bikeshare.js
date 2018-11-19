@@ -42,6 +42,19 @@ var dotToggle = 'red';
 var pathDefault = d3.rgb(192, 192, 192);
 // var pathDefault = 'pink';
 var pathToggle = 'red';
+
+var clickSize = 10;
+var downX;
+var upX;
+var downY;
+var upY;
+var curX;
+var curY;
+var mouseDown = false;
+
+var selectionCount = 0;
+var selectionColors = ['Red', 'Blue', 'Green', 'Pink', 'Purple', 'Orange', 'Red']
+
 var cur_dataset;
 var cur_day;
 
@@ -78,7 +91,17 @@ var svgOutPlot = d3.select("#outPlot").attr('x', mapWidth + inPlotWidth).attr('y
         .append("svg")
         .attr("width", outPlotWidth)
         .attr("height", outPlotHeight); 
- 
+
+var highlightRect = svgMap.append('svg:rect')
+        .attr('width', 0)
+        .attr('height', 0)
+        .style('fill', 'rgba(0, 0, 0, 0.5)')
+        .on('mouseup', function (d) {
+                resolveMouseUp();
+        })
+        .on('mousemove', function(d) {
+                drawHighlightRect();  
+        });
 
         //JUST FOR POSITIONING TEMPORARYRRRRRYYYYYYYY
 svgFilters.append('svg:rect')
@@ -149,7 +172,7 @@ seasonLabels
 function dayFilterClick(day) {
     console.log(day, cur_dataset['1st & D St SE']['Friday']);
     cur_day = day;
-    d3.selectAll('#lines')
+    d3.selectAll('.lines')
         .remove()
     drawInPlot(day,cur_dataset); // draws new day of the week lines
 
@@ -189,38 +212,6 @@ var drawStations = function() {
                 .range([mapHeight, 0]);
                 
 
-        svgMap.append('svg:rect')
-                .attr("width", mapWidth)
-                .attr("height", mapHeight)
-                .style('fill', 'white')
-                .style('opactiy', 0.0)
-                .on('click', function(d) { 
-                        var x = d3.event.pageX;
-                        var y = d3.event.pageY
-                        console.log(x, y)
-                
-                        d3.selectAll('.station')
-                                .attr('fill', function(d) {
-                                        dot = d3.select(this)
-                                        if (dot.attr('highlighted') == 'off') {
-                                                highlight(d, true);
-                                                dot.style('fill', dotToggle)
-                                                        .attr('highlighted', 'on')
-                                                        .moveToFront();
-                                        } else {
-                                                highlight(d, false);
-                                                dot.style('fill', dotDefault)
-                                                        .attr('highlighted', 'off');
-                                        }
-                                })
-                
-                });
-
-                        
-                        
-
-
-
         station = svgMap.selectAll('.station')
                 .data(stationData)
 
@@ -248,20 +239,116 @@ var drawStations = function() {
                         
                 // });
         // .style('fill', function(d) {if (d['Address'] == '15th St & Constitution Ave NW') {return 'pink';} else {return dotDefault;}});
+ 
+
+        svgMap.append('svg:rect')
+                .attr("width", mapWidth)
+                .attr("height", mapHeight)
+                .style('fill', 'rgba(0, 0, 0, 0.0)')
+                .moveToFront()
+                .on('mousemove', function(d) {
+                        drawHighlightRect();
+                        
+                })
+                .on('mousedown', function(d) {
+                        downX = d3.event.pageX;
+                        downY = d3.event.pageY;
+                        highlightRect
+                                .attr('x', downX)
+                                .attr('y', downY)
+                                .moveToFront();
+                        console.log(downX, downY)
+                        mouseDown = true;
+                })
+                .on('mouseup', function(d) {
+                        resolveMouseUp();
+
+                });
 }
 
+function resolveMouseUp() {
+        upX = d3.event.pageX;
+        upY = d3.event.pageY;
+        console.log(upX, upY)
+        mouseDown = false;
+        highlightRect
+                .attr('width', 0)
+                .attr('height', 0);
+                
+
+        d3.selectAll('.station')
+                .attr('fill', function(d) {
+                        dot = d3.select(this);
+                        if (dot.attr('cx') <= Math.max(upX, downX) 
+                                && dot.attr('cx') >= Math.min(upX, downX)  
+                                && dot.attr('cy') <= Math.max(upY, downY)  
+                                && dot.attr('cy') >= Math.min(upY, downY) ) {
+                                        // if (dot.attr('highlighted') == 'off') {
+                                        if (dot.style('fill') != selectionColors[(selectionCount + 5) % 6]){
+                                                highlight(d, true);
+                                                dot.style('fill', selectionColors[selectionCount])
+                                                        .attr('highlighted', 'on')
+                                        } else {
+                                                highlight(d, false);
+                                                dot.style('fill', dotDefault)
+                                                        .attr('highlighted', 'off');
+                                        }
+                                }
+        })
+        console.log(selectionCount);
+        selectionCount = (selectionCount % 6) + 1;
+        console.log('changed to ')
+        console.log(selectionCount)
+        
+        
+}
+
+function drawHighlightRect() {
+        if (mouseDown) {
+                curX = d3.event.pageX;
+                curY = d3.event.pageY; 
+                dX = curX - downX;
+                dY = curY - downY
+                if (dX >= 0) {
+                        if (dY >= 0) {
+                                highlightRect
+                                        .attr('width', dX)
+                                        .attr('height', dY);
+                        } else {
+                                highlightRect
+                                        .attr('width', dX)
+                                        .attr('height', Math.abs(dY))
+                                        .attr('y', curY)
+                        }
+                } else {
+                        if (dY >= 0) {
+                                highlightRect
+                                        .attr('width', Math.abs(dX))
+                                        .attr('x', curX)
+                                        .attr('height', dY);
+                        } else {
+                                highlightRect
+                                        .attr('width', Math.abs(dX))
+                                        .attr('x', curX)
+                                        .attr('height', Math.abs(dY))
+                                        .attr('y', curY)
+                        }
+                }
+                
+        }
+}
 
 // var colors = ['blue', 'green', 'red', 'orange', 'black', 'pink'];
 function highlight(d, turnOn) {
-        console.log(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.',''))
+        // console.log("#c-"+d['Address'].replace(/\W/g, ''))
         if(turnOn) {
-                d3.selectAll(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.',''))
+                d3.selectAll("#c-"+d['Address'].replace(/\W/g, ''))     
                         .style('stroke-width', 2)
                         // .style('stroke', function(d) { return colors[Math.floor(Math.random() * colors.length)]})
-                        .style('stroke', pathToggle)
+                        .style('stroke', selectionColors[selectionCount])
                         .moveToFront();
         } else {
-                d3.selectAll(".c-" + d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.',''))
+                d3.selectAll("#c-"+d['Address'].replace(/\W/g, '')) 
                         .style('stroke-width', 1)
                         // .style('stroke', function(d) { return colors[Math.floor(Math.random() * colors.length)]})
                         .style('stroke', pathDefault);
@@ -323,18 +410,8 @@ var drawInPlot = function(day_filter,data_set) {
                 .attr('transform', 'translate(' + inPlotWidth + ',0)')
                 .call(yAxisRight);
 
-        // for (station in Q1dataIn) {
-        //         for (x in Q1dataIn[station]['Monday']) {
-        //                 // console.log(Q1dataIn[station]['Monday'][x])
-        //                 svg.append('svg:circle')
-        //                         .attr('r', 2)
-        //                         .style('fill', function(d) {if(station == 'Yuma St & Tenley Circle NW') {return 'blue'} return 'green'})
-        //                         .attr('cx', xScale(x))
-        //                         .attr('cy', yScale(Q1dataIn[station]['Monday'][x]))
-        //         }
-        // }
         
-        lines = svg.selectAll('.line')
+        lines = svg.selectAll('.lines')
                 .data(d3.values(data_set))
                 .enter();
 
@@ -344,13 +421,13 @@ var drawInPlot = function(day_filter,data_set) {
                 .interpolate("linear");
         
         lines.append('svg:path')
-                .attr('id', 'lines')
-                .attr('class', function(d) {return 'c-'+d['Address'].replace(/\s/g, '').replace('&','').replace('/','').replace("'", '').replace('.','');})
+                .attr('id', function(d) { return 'c-'+d['Address'].replace(/\W/g, ''); })
+                .attr('class', 'lines')
                 .attr('d', function(d) { return lineFunction(generateLineData(d,day_filter)); })
                 .attr('stroke', pathDefault)
                 .attr('stroke-width', 1)
                 .attr('fill', 'none')
-                .on('click', function(d) {console.log(d3.select(this).attr('class'))})
+                .on('click', function(d) {console.log(d3.select(this).attr('id'))})
 }
 
 function generateLineData(d,day_filter) {
