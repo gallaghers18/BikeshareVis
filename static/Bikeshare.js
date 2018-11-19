@@ -13,6 +13,7 @@ var inPlotWidth = mapWidth;
 var inPlotHeight = mapWidth;
 var outPlotWidth = mapWidth;
 var outPlotHeight = mapWidth;
+var margin = 40;
 
 var stationData;
 var Q1dataIn;
@@ -24,8 +25,6 @@ var Q2dataOut;
 var Q3dataOut;
 var Q4dataOut;
 
-var xScaleIn;
-var yScaleIn;
 
 var getStationData = '/stationData/';
 var getQ1dataIn = '/Q1dataIn/';
@@ -55,7 +54,8 @@ var mouseDown = false;
 var selectionCount = 0;
 var selectionColors = ['Red', 'Blue', 'Green', 'Pink', 'Purple', 'Orange', 'Red']
 
-var cur_dataset;
+var cur_dataset_in;
+var cur_dataset_out;
 var cur_day;
 var last_dayClicked;
 var last_seasonClicked;
@@ -63,8 +63,8 @@ var last_seasonClicked;
 
 //Resize container svg
 d3.select("#container")
-        .attr('width', mapWidth+inPlotWidth+outPlotWidth)
-        .attr('height', mapHeight+filtersHeight);
+        .attr('width', mapWidth+inPlotWidth+outPlotWidth+2*margin)
+        .attr('height', mapHeight+filtersHeight+margin);
 
 //Resize background
 d3.select("#mapBackground").attr('width', mapWidth).attr('height', mapHeight).style('position', 'absolute');
@@ -79,17 +79,17 @@ var svgMap = d3.select("#map").attr('x', 0).attr('y', 0)
 
 d3.select("#filters").attr('x', 2*mapWidth)
 
-var svgFilters = d3.select("#filters").attr('x', 0).attr('y', mapHeight)
+var svgFilters = d3.select("#filters").attr('x', 0).attr('y', mapHeight+margin)
         .append("svg")
         .attr("width", filtersWidth)
         .attr("height", filtersHeight);
 
-var svgInPlot = d3.select("#inPlot").attr('x', mapWidth).attr('y', 0)
+var svgInPlot = d3.select("#inPlot").attr('x', mapWidth + margin).attr('y', 0)
         .append("svg")
         .attr("width", inPlotWidth)
         .attr("height", inPlotHeight);
 
-var svgOutPlot = d3.select("#outPlot").attr('x', mapWidth + inPlotWidth).attr('y', 0)
+var svgOutPlot = d3.select("#outPlot").attr('x', mapWidth + inPlotWidth + 2*margin).attr('y', 0)
         .append("svg")
         .attr("width", outPlotWidth)
         .attr("height", outPlotHeight); 
@@ -103,18 +103,16 @@ var highlightRect = svgMap.append('svg:rect')
         })
         .on('mousemove', function(d) {
                 drawHighlightRect();  
-        });
+        })
+        .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 
         //JUST FOR POSITIONING TEMPORARYRRRRRYYYYYYYY
 svgFilters.append('svg:rect')
         .attr('width', filtersWidth)
         .attr('height', filtersHeight)
-        .style('fill', 'grey');
-
-svgOutPlot.append('svg:rect')
-        .attr('width', outPlotWidth)
-        .attr('height', outPlotHeight)
-        .style('fill', 'orange');
+        .style('fill', '#DCDCDC')
+        .style('stroke', 'black');
 
 //I start building filters below
 dayMap = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
@@ -131,20 +129,25 @@ dayFilter
         .enter()
         .append('svg:rect')
         .attr('class', function(d){return d;})
-        .attr('x', function(d,i){return i*(filtersWidth/7);})
-        .attr('y',filtersHeight-filtersWidth/10)
+        .attr('x', function(d,i){return i*(filtersWidth/7) + filtersWidth/72;})
+        .attr('y',filtersHeight-filtersWidth/10-3)
         .attr('width', filtersWidth/9)
-        .attr('height',filtersWidth/9)
-        .style('fill', 'steelBlue')
-        .on('click', dayFilterClick);
+        .attr('height',filtersWidth/10)
+        .style('fill', 'rgb(255,50,30)')
+        .style('stroke', 'white')
+        .on('click', dayFilterClick)
+        .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 
 dayLabels
         .enter()
         .append('text')
-        .attr('x', function(d,i){return (i*(filtersWidth/7)+filtersWidth/36);})
-        .attr('y',filtersHeight - filtersWidth/18)
+        .attr('x', function(d,i){return (i*(filtersWidth/7)+filtersWidth/36+filtersWidth/72);})
+        .attr('y',filtersHeight - filtersWidth/18-3)
         .text(function(d){return d.substring(0, 3)+'.';})
-        .on('click', dayFilterClick);
+        .on('click', dayFilterClick)
+        .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 
 seasonFilter = svgFilters.selectAll('.rect')
         .data(seasonMap);
@@ -156,34 +159,44 @@ seasonFilter
         .enter()
         .append('svg:rect')
         .attr('class', function(d){return d;})
-        .attr('x', function(d,i){return i*(filtersWidth/4);})
-        .attr('y',0)
+        .attr('x', function(d,i){return i*(filtersWidth/4) + filtersWidth/24;})
+        .attr('y',3)
         .attr('width', filtersWidth/6)
-        .attr('height',filtersWidth/9+10)
-        .style('fill', 'steelBlue')
-        .on('click', seasonFilterClick);
+        .attr('height',filtersWidth/9)
+        .style('fill', 'rgb(255,50,30)')
+        .style('stroke', 'white')
+        .on('click', seasonFilterClick)
+        .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 
 seasonLabels
         .enter()
         .append('text')
-        .attr('x', function(d,i){return (i*(filtersWidth/4)+filtersWidth/24);})
-        .attr('y',20)
+        .attr('x', function(d,i){return (i*(filtersWidth/4)+filtersWidth/12);})
+        .attr('y',23)
         .text(function(d){return d;})
-        .on('click', dayFilterClick);
+        .on('click', seasonFilterClick)
+        .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+        .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
+
+
 
 function dayFilterClick(day) {
-    console.log(day, cur_dataset['1st & D St SE']['Friday']);
+    console.log(day, cur_dataset_in['1st & D St SE']['Friday']);
     cur_day = day;
     
     d3.select("."+last_dayClicked) //make last pressed day button normal color
-    .style('fill', 'steelBlue');
+        .style('fill', 'rgb(255,50,30)')
+        .style('stroke', 'white');
 
     d3.select("."+day) // make newly pressed day button darker color
-        .style('fill', '#004d80');
+        .style('fill', 'white')
+        .style('stroke', 'rgb(255,50,30)');
 
     d3.selectAll('.lines')
         .remove()
-    drawInPlot(day,cur_dataset); // draws new day of the week lines for given season
+    drawPlot(day,cur_dataset_in, true)
+    drawPlot(day,cur_dataset_out, false); // draws new day of the week lines for given season
 
     d3.selectAll('.station')
         .attr('highlighted', 'off')
@@ -194,22 +207,33 @@ function dayFilterClick(day) {
 
 function seasonFilterClick(season){
     d3.select("."+last_seasonClicked) // make last pressed season button normal color
-    .style('fill', 'steelBlue');
+        .style('fill', 'rgb(255,50,30)')
+        .style('stroke', 'white');
 
     d3.select("."+season) //make last pressed season button darker color
-        .style('fill', '#004d80');    
+        .style('fill', 'white')
+        .style('stroke', 'rgb(255,50,30)');    
 
     if (season==seasonMap[0]){
-        cur_dataset = Q1dataIn
+        cur_dataset_in = Q1dataIn;
+        cur_dataset_out = Q1dataOut;
+
     }
     if (season == seasonMap[1]){
-        cur_dataset = Q2dataIn
+        cur_dataset_in = Q2dataIn;
+        cur_dataset_out = Q2dataOut;
+
     }
     if (season == seasonMap[2]){
-        cur_dataset = Q3dataIn
+        cur_dataset_in = Q3dataIn;
+        cur_dataset_out = Q3dataOut;
+
     }
     if (season == seasonMap[3]){
-        cur_dataset = Q4dataIn
+        cur_dataset_in = Q4dataIn;
+        cur_dataset_out = Q4dataOut;
+
+
     }
     dayFilterClick(cur_day);
     last_seasonClicked = season; // keep track of last square pressed
@@ -218,16 +242,16 @@ function seasonFilterClick(season){
 
 
 var drawStations = function() {
-    xScale = d3.scale.linear()
+        
+        var xScale = d3.scale.linear()
                 .domain([d3.min(stationData, function(d) { return parseFloat(d['Longitude']); }),
                         d3.max(stationData, function(d) { return parseFloat(d['Longitude']); })])
                 .range([0, mapWidth]);
-    
-        yScale = d3.scale.linear()
+
+        var yScale = d3.scale.linear()
                 .domain([d3.min(stationData, function(d) { return parseFloat(d['Latitude']); }),
                         d3.max(stationData, function(d) { return parseFloat(d['Latitude']); })])
                 .range([mapHeight, 0]);
-                
 
         station = svgMap.selectAll('.station')
                 .data(stationData)
@@ -262,6 +286,7 @@ var drawStations = function() {
                 .attr("width", mapWidth)
                 .attr("height", mapHeight)
                 .style('fill', 'rgba(0, 0, 0, 0.0)')
+                .style('stroke', 'black')
                 .moveToFront()
                 .on('mousemove', function(d) {
                         drawHighlightRect();
@@ -280,7 +305,9 @@ var drawStations = function() {
                 .on('mouseup', function(d) {
                         resolveMouseUp();
 
-                });
+                })
+                .on('mouseover', function(d) { d3.select(this).style('cursor', 'pointer')})
+                .on('mouseout', function(d) { d3.select(this).style('cursor', 'default')});
 }
 
 function resolveMouseUp() {
@@ -374,24 +401,30 @@ function highlight(d, turnOn) {
 
 }
 
-var drawInPlot = function(day_filter,data_set) {
-        // data_set = Q1dataIn;
-        maxY = d3.max(d3.values(data_set), function(d) {
-                return d3.max(d3.values(d['Wednesday']))
-        });
 
-        xScaleIn = d3.scale.linear()
+
+var drawPlot = function(day_filter,data_set, isInPlot) {
+        // data_set = Q1dataIn;
+        
+        maxY = d3.max(d3.values(Q3dataIn), function(d) {
+                return d3.max(d3.values(d['Thursday']))
+        });
+        
+        xScaleLine = d3.scale.linear()
                 .domain([0, 23.5])
                 .range([0, inPlotWidth]);
-
-        yScaleIn = d3.scale.linear()
+        
+        yScaleLine = d3.scale.linear()
                 .domain([0, maxY])
                 .range([outPlotWidth, 0]);
+        if (isInPlot) {
+                 svg = svgInPlot
+        } else {
+                svg = svgOutPlot
+        }
 
-        svg = svgInPlot
- 
         xAxisBottom = d3.svg.axis()
-                .scale(xScaleIn)
+                .scale(xScaleLine)
                 .orient('bottom')
                 .ticks(5)
                 .tickSize(5);
@@ -400,7 +433,7 @@ var drawInPlot = function(day_filter,data_set) {
                 .attr('transform', 'translate(0,' + inPlotHeight + ')')
                 .call(xAxisBottom)
         xAxisTop = d3.svg.axis()
-                .scale(xScaleIn)
+                .scale(xScaleLine)
                 .orient('top')
                 // .ticks(topTicks)
                 // .tickSize(topTicks);
@@ -409,7 +442,7 @@ var drawInPlot = function(day_filter,data_set) {
                 .attr('transform', 'translate(0,' + 0 + ')')
                 .call(xAxisTop)
         yAxisLeft = d3.svg.axis()
-                .scale(yScaleIn)
+                .scale(yScaleLine)
                 .orient('left')
                 .ticks(5)
                 .tickSize(5);
@@ -418,7 +451,7 @@ var drawInPlot = function(day_filter,data_set) {
                 .attr('transform', 'translate(' + 0 + ',0)')
                 .call(yAxisLeft);
         yAxisRight = d3.svg.axis()
-                .scale(yScaleIn)
+                .scale(yScaleLine)
                 .orient('right')
                 // .ticks(rightTicks)
                 // .tickSize(rightTicks);
@@ -426,6 +459,12 @@ var drawInPlot = function(day_filter,data_set) {
                 .attr('class', 'axis')
                 .attr('transform', 'translate(' + inPlotWidth + ',0)')
                 .call(yAxisRight);
+
+        title = svg.append('svg:text')
+                .attr('x', 10)
+                .attr('y', 30)
+                .text('Bikes In')
+                .style('font-size', '24px');
 
         
         lines = svg.selectAll('.lines')
@@ -450,22 +489,47 @@ var drawInPlot = function(day_filter,data_set) {
 function generateLineData(d,day_filter) {
         if (!(day_filter in d)) {
                 // console.log("skipped it",d)
-                return [{"x": xScaleIn(0), "y": yScaleIn(0)},
-                        {"x": xScaleIn(23.5), "y": yScaleIn(0)}];
+                return [{"x": xScaleLine(0), "y": yScaleLine(0)},
+                        {"x": xScaleLine(23.5), "y": yScaleLine(0)}];
         }
 
         lineData = []
 
         for (var x=0; x < 24; x=x+0.5) {
                 if (x in d[day_filter]) {
-                        lineData.push({"x": xScaleIn(x), "y": yScaleIn(d[day_filter][x])});
+                        lineData.push({"x": xScaleLine(x), "y": yScaleLine(d[day_filter][x])});
                 } else {
-                        lineData.push({"x": xScaleIn(x), "y": yScaleIn(0)});
+                        lineData.push({"x": xScaleLine(x), "y": yScaleLine(0)});
                 }
         }
 
         for (x in d[day_filter]) {
-                lineData.push({"x": xScaleIn(x), "y": yScaleIn(d[day_filter][x])});
+                lineData.push({"x": xScaleLine(x), "y": yScaleLine(d[day_filter][x])});
+        }
+
+        return lineData;
+
+}
+
+function generateLineDataIn(d,day_filter) {
+        if (!(day_filter in d)) {
+                // console.log("skipped it",d)
+                return [{"x": xScaleLine(0), "y": yScaleLine(0)},
+                        {"x": xScaleLine(23.5), "y": yScaleLine(0)}];
+        }
+
+        lineData = []
+
+        for (var x=0; x < 24; x=x+0.5) {
+                if (x in d[day_filter]) {
+                        lineData.push({"x": xScaleLine(x), "y": yScaleLine(d[day_filter][x])});
+                } else {
+                        lineData.push({"x": xScaleLine(x), "y": yScaleLine(0)});
+                }
+        }
+
+        for (x in d[day_filter]) {
+                lineData.push({"x": xScaleLine(x), "y": yScaleLine(d[day_filter][x])});
         }
 
         return lineData;
@@ -502,21 +566,26 @@ d3.json(getStationData, function(error, data) {
                                         d3.json(getQ2dataOut, function(error, data) {
                                             Q2dataOut = data['data'];
                                             d3.json(getQ3dataOut, function(error, data) {
-                                                    Q3data = data['data'];
+                                                    Q3dataOut = data['data'];
                                                     d3.json(getQ4dataOut, function(error, data) {
-                                                            Q4data = data['data'];
-                                                            cur_dataset = Q1dataIn;
+                                                            Q4dataOut = data['data'];
+                                                            cur_dataset_in = Q1dataIn;
+                                                            cur_dataset_out = Q1dataOut;
                                                             cur_day = 'Monday';
                                                             last_seasonClicked = 'Winter';
                                                             last_dayClicked = 'Monday';
 
                                                             d3.select("."+last_seasonClicked)
-                                                                .style('fill', '#004d80');
+                                                                .style('fill', 'white')
+                                                                .style('stroke', 'rgb(255,50,30)');
                                                             d3.select("."+last_dayClicked)
-                                                                .style('fill', '#004d80');
+                                                                .style('fill', 'white')
+                                                                .style('stroke', 'rgb(255,50,30)');
 
                                                             drawStations();
-                                                            drawInPlot('Monday',cur_dataset);
+                                                            drawPlot('Monday',cur_dataset_in, true);
+                                                            drawPlot('Monday',cur_dataset_out, false);
+
                                                         });
                                                 });
                                         });
@@ -526,3 +595,4 @@ d3.json(getStationData, function(error, data) {
         });
 });
 });
+
